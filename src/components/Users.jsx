@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 
 const Users = ({ users }) => {
   const [allUsers, setAllUsers] = useState([]);
@@ -27,12 +28,23 @@ const Users = ({ users }) => {
         console.log("Post successful with data:", data);
         if (data.insertedId) {
           alert("User is added with id", data.insertedId);
-          setAllUsers([...allUsers, newUser]);
+          newUser._id=data.insertedId;
+          const newUsers=[...allUsers, newUser];
+          setAllUsers(newUsers);
         }
       });
   };
   const handleDeleteButton=(userId)=>{
-    fetch('http://localhost:3000/delete/:2').
+    fetch(`http://localhost:3000/users/${userId}`, {
+      method:"DELETE"
+    })
+    .then(res=>res.json())
+    .then(data=>{
+      console.log("Deleted: ",data)
+      const remainingUsers=allUsers.filter(user=> user._id!=userId );
+      console.log("remaining: ", remainingUsers);
+      setAllUsers(remainingUsers)
+    })
 
   }
   return (
@@ -59,7 +71,9 @@ const Users = ({ users }) => {
               <tr key={index}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
-                <td><button onClick={()=>handleDeleteButton(user.id)}>Delete</button></td>
+                <td><Link to={`/users/${user._id}`}>User Details</Link></td>
+                <td><button onClick={()=>handleDeleteButton(user._id)}>Delete</button></td>
+
               </tr>
             );
           })}
